@@ -1,0 +1,129 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script>
+        var socket = io.connect('http://195.234.11.44:8081');
+
+        // on connection to server, ask for user's name with an anonymous callback
+        socket.on('connect', function(){
+                // call the server-side function 'adduser' and send one parameter (value of prompt)
+                socket.emit('adduser', {name:prompt("Whats you name?"),lat:'50',lon:'1'});
+        });
+
+
+// listener, whenever the server emits 'updatecharacter', this updates the chat body
+        socket.on('updatecharacter', function (username, data) {
+});
+
+        // on load of page
+        $(function(){
+				
+    $("div").mousemove(function(e){
+    //  socket.emit('updatecharacter',e.pageX);
+
+    });
+
+        });
+
+</script>
+<!DOCTYPE html>
+<html>
+<body>
+
+<html>
+
+<title>geolocation</title>
+<meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' /> 
+<head>
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+  
+<script type="text/javascript" src="jquery.cook.js"></script>
+<script type="text/javascript">
+
+function success(position) {
+  var s = document.querySelector('#status');
+  
+  if (s.className == 'success') {
+       
+    return;
+  }
+  
+  s.innerHTML = "found you!";
+  s.className = 'success';
+  
+  var mapcanvas = document.createElement('div');
+  mapcanvas.id = 'mapcanvas';
+  mapcanvas.style.height = '100%';
+  mapcanvas.style.width = '100%';
+    
+  document.querySelector('#map').appendChild(mapcanvas);
+  
+  var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+   
+  var myOptions = {
+    zoom: 15,
+    center: latlng,
+    mapTypeControl: false,
+    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+  var map = new google.maps.Map(document.getElementById("mapcanvas"), myOptions);
+  
+  var marker = new google.maps.Marker({
+      position: latlng, 
+      map: map, 
+      title:"You are here!"
+  });
+  socket.emit('updatecharacter',position.coords.latitude);
+
+}
+
+function error(msg) {
+  var s = document.querySelector('#status');
+  s.innerHTML = typeof msg == 'string' ? msg : "failed";
+  s.className = 'fail';
+  
+  // console.log(arguments);
+}
+
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(success, error);
+} else {
+  error('not supported');
+}
+
+$(document).ready(function()
+{
+$("#check").click(function()
+{
+var lat  = $.cookie("MyLat");
+var lon = $.cookie("MyLon");
+alert('Latitued: '+lat);
+alert('Longitude: '+lon);
+var url="http://maps.googleapis.com/maps/api/geocode/json?latlng="+lat+","+lon+"&sensor=false";
+alert('Google Map API: '+url);
+  
+});
+});
+</script>
+</head>
+<body style="color:#fff;background:#333; font-family:Arial, Helvetica, sans-serif">
+
+<div style='width:100%;height:auto'>
+
+<h2>Geo location with HTML5 and Jquery. Click this <input type="button" id="check" value='Check-out'  style="background:#00880E;padding:8px; font-weight:bold;width:200px; font-size:14px;color:#fff; margin-bottom:5px"/> and get latitude and longitude values.
+</h2>
+
+<div id="status">Loading.............</div>
+
+<div id="map"></div>
+
+
+</div>
+
+</body>
+</html>
+</body>
+</html>
+

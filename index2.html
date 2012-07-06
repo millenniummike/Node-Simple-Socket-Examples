@@ -1,0 +1,64 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script>
+        var socket = io.connect('http://195.234.11.44:8081');
+
+        // on connection to server, ask for user's name with an anonymous callback
+        socket.on('connect', function(){
+                // call the server-side function 'adduser' and send one parameter (value of prompt)
+                socket.emit('adduser', {name:prompt("Whats you name?"),lat:'50',lon:'1'});
+        });
+
+
+// listener, whenever the server emits 'updatecharacter', this updates the chat body
+        socket.on('updatecharacter', function (username, data) {
+});
+
+        // on load of page
+        $(function(){
+                // when the client clicks SEND
+
+                $('#data').keypress(function(e) {
+                                 var char=e.which;
+                                socket.emit('updatecharacter',char);
+                });
+				
+				    $("div").mousemove(function(e){
+      var pageCoords = "( " + e.pageX + ", " + e.pageY + " )";
+      var clientCoords = "( " + e.clientX + ", " + e.clientY + " )";
+      $("span:first").text("( e.pageX, e.pageY ) : " + pageCoords);
+      $("span:last").text("( e.clientX, e.clientY ) : " + clientCoords);
+        socket.emit('updatecharacter',e.pageX);
+		console.log("sent!");
+
+    });
+
+        });
+
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+  div { width:220px; height:170px; margin: 10px 50px 10px 10px;
+        background:yellow; border:2px groove; float:right; }
+  p { margin:0; margin-left:10px; color:red; width:220px;
+      height:120px; padding-top:70px;
+      float:left; font-size:14px; }
+  span { display:block; }
+  </style>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+  <p>
+    <span>Move the mouse over the div.</span>
+    <span>&nbsp;</span>
+  </p>
+
+  <div>
+  <input type='text' id='data' name='data'/>
+  </div>
+
+</body>
+</html>
+

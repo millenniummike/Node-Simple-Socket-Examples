@@ -1,0 +1,138 @@
+<style>
+.speech-bubble::before {
+content: "";
+position: absolute;
+top: 12px;
+left: -6px;
+border-width: 5px 5px 5px 0;
+border-style: solid;
+border-color: transparent lightGrey;
+display: block;
+width: 0;
+}
+
+.speech-bubble::after {
+content: "";
+position: absolute;
+top: 12px;
+left: -5px;
+border-width: 5px 5px 5px 0;
+border-style: solid;
+border-color: transparent white;
+display: block;
+width: 0;
+}
+
+.speech-bubble {
+-webkit-border-radius: 8px;
+-moz-border-radius: 8px;
+border-radius: 8px;
+}
+.speech-bubble {
+background: white;
+position: relative;
+border: 1px solid lightGrey;
+height:50px;
+width:40%;
+padding:10px;
+float:left;
+margin-bottom:5px;
+}
+.user {
+float:left;
+width:50%;
+margin-bottom:5px;
+}
+.username {
+float:left;
+width:20%;
+margin-bottom:5px;
+}
+
+.conversation{
+width:40%;
+float:right;
+}
+
+</style>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script>
+	var socket = io.connect('http://195.234.11.44:8080');
+
+	// on connection to server, ask for user's name with an anonymous callback
+	socket.on('connect', function(){
+		// call the server-side function 'adduser' and send one parameter (value of prompt)
+		socket.emit('adduser', {name:prompt("Whats you name?"),lat:'50',lon:'1'});
+	});
+
+	// listener, whenever the server emits 'updatechat', this updates the chat body
+	socket.on('updatechat', function (username, data) {
+		$('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+		$('#'+username+'_bubble').html('');
+	});
+
+
+// listener, whenever the server emits 'updatecharacter', this updates the chat body
+        socket.on('updatecharacter', function (username, data) {
+                $('#'+username+'_bubble').append( String.fromCharCode(data));
+});
+
+	// listener, whenever the server emits 'updateusers', this updates the username list
+	socket.on('updateusers', function(data) {
+		$('#users').empty();
+		$.each(data, function(key, value) {
+		$('#users').append('<div class="username">' + key +'</div><div style="height:50px" class="speech-bubble" id="'+key+'_bubble"></div><div style="clear:both;"/>');
+		});
+	});
+
+	// on load of page
+	$(function(){
+		// when the client clicks SEND
+		$('#datasend').click( function() {
+			var message = $('#data').val();
+			$('#data').val('');
+			// tell server to execute 'sendchat' and send along one parameter
+			socket.emit('sendchat', message);
+		});
+
+		 $('#datasendbroadcast').click( function() {
+                        var message = $('#data').val();
+                        $('#data').val('');
+                        // tell server to execute 'sendchat' and send along one parameter
+                        socket.emit('sendbroadcast', message);
+                });
+
+		// when the client hits a key on their keyboard
+		$('#data').keydown(function(e) {
+			if(e.which == 13) {
+				$(this).blur();
+				$('#datasend').focus().click();
+			}	
+                                if (e.which==8) {
+                                // backspace
+                                }
+
+		});
+
+                $('#data').keypress(function(e) {
+                               if (e.which!=13) {
+				 var char=e.which;
+                                socket.emit('sendcharacter',char);
+				}
+                });
+
+	});
+
+</script>
+<div class="user">
+	<b>USERS</b>
+	<div id="users"></div>
+</div>
+<div class="conversation">
+	<div id="conversation"></div>
+</div>
+	<input id="data" style="width:200px;" />
+	<input type="button" id="datasend" value="send" />
+	<input type="button" id="datasendbroadcast" value="LOL" />
